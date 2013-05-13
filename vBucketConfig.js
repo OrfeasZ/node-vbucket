@@ -24,6 +24,7 @@ vBucketConfig.prototype.Parse = function()
     this.ReplicaNumber = this.vBucketServerMap['numReplicas'];
     this.ServerList = this.vBucketServerMap['serverList'];
     this.vBucketMap = this.vBucketServerMap['vBucketMap'];
+    this.vBucketMapForward = this.vBucketServerMap['vBucketMapForward'] || null;
 
     // Check if our config is valid
     if (this.HashAlgorithm === undefined ||
@@ -69,6 +70,27 @@ vBucketConfig.prototype.Map = function(p_Key)
     }
 
     return { 'vBucketID': s_vBucketID, 'Server': s_Server, 'Replicas': s_Replicas };
+};
+
+vBucketConfig.prototype.MapInvalid = function(p_Key, p_vBucketID, p_WrongServer)
+{
+    var s_vBucket = this.vBucketMap[p_vBucketID];
+    var s_MappedServer = this.ServerList[s_vBucket[0]];
+
+    // Check if we have a fast-forward map
+    if (this.vBucketMapForward !== null)
+    {
+        var s_vBucketFwd = this.vBucketMapForward[p_vBucketID];
+        s_MappedServer = this.ServerList[s_vBucketFwd[0]];
+        this.vBucketMap[p_vBucketID ] = this.vBucketMapForward[p_vBucketID];
+    }
+    else if (s_MappedServer == p_WrongServer)
+    {
+        s_MappedServer = this.ServerList[(this.ServerList.indexOf(p_WrongServer) + 1) % this.ServerList.length];
+        this.vBucketMap[p_vBucketID][0] = this.ServerList.indexOf(s_MappedServer);
+    }
+
+    return s_MappedServer;
 };
 
 module.exports = vBucketConfig;

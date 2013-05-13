@@ -1,6 +1,6 @@
 {
     "name": "vbucket",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "author": "Orfeas Zafeiris <orfeaz@gmail.com>",
     "description": "A port of libvbucket to node.js in pure JavaScript.",
     "main": "./vBucketConfig.js",
